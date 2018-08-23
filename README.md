@@ -42,3 +42,6 @@ abyz.co.uk/rpi/pigpio/code/minimal_clk.zip
 https://www.circuitsathome.com/mcu/reading-rotary-encoder-on-arduino/
 https://www.tansi.org/rp/interfacing5v.html
 https://github.com/machinekit
+https://github.com/hzeller/rpi-gpio-dma-demo
+https://gist.github.com/ast/a19813fce9d34c7240091db11b8190dd
+
