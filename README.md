@@ -33,10 +33,11 @@ The GPIO speed tests I have seen seem fast enough, the problem is if the cpu is 
 
 GPIO 3.3V to 5V
           5,6,13,16,19,20,21,26 <- D0-D7
-          4  -> CLK
-          23  -> SEL
-          24  -> EN
+          4  -> CLK 1-4
+          23  -> SEL 1 - 4
+          24  -> EN 1
           
+https://github.com/machinekoder/machinekit-vagrant          
           
 abyz.co.uk/rpi/pigpio/code/minimal_clk.zip
 
