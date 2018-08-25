@@ -1,9 +1,11 @@
+
 /*
   Simple Lathe Controller based on Arduino Nano and HCTL2000
   
   Author:
-  Log: HdW, Aug 2018 - Draft 1, not tested
-  
+  Log:  HdW, Aug 2018 - Draft 1, Tested
+  ToDo:   
+            
   Limits calculations:
    If the HCTL clock input is 14 MHZ, accordning to the datasheet, the maximum input pulse frequency is 14/3 MHZ or 4,67MHZ
    this equates to 214.3 nS per pulse. 
@@ -43,42 +45,50 @@ For reference, and code snips, ideas, credits are due:
  https://www.circuitsathome.com/mcu/reading-rotary-encoder-on-arduino/
 */
  
+
+
+#define d2 2 // PD2  14
+#define d3 3 // PD3  13
+#define d4 4 // PD4  12
+#define d5 5 // PD5  11
+#define d6 6 // PD6  10
+#define d7 7 // PD7  9
+
+#define d0 14 // PC0 1
+#define d1 15 // PC1 15
+
+#define res 8 //PB0 5
+#define clk 9 // PB1 2
+
+#define oe1 10 //PB2 4
+#define oe2 11 //PB3
+#define oe3 12 //PB4
+#define xxx 13 //PB5
+
 #define ENC_A 16
 #define ENC_B 17
 #define ENC_PORT PINC
 
-#define d2 2 // PD2
-#define d3 3 // PD3
-#define d4 4 // PD4
-#define d5 5 // PD5
-#define d6 6 // PD6
-#define d7 7 // PD7
-
-#define d0 14 // PC0
-#define d1 15 // PC1
-
-#define res 10 //PB0
-#define clk 9 // PB1
-
-#define oe1 10 //PB2
-#define oe2 11 //PB3
-#define oe3 12 //PB4
-#define open 13 //PB5
-
-
-static uint8_t count[3] = {0x0,0x0,0x0}; 
-static uint8_t count_old[3] = {0x0,0x0,0x0}; 
-static long  position[3] = {0x0,0x0,0x0};
+static int8_t count[3] = {0x0,0x0,0x0}; 
+static int8_t count_old[3] = {0x0,0x0,0x0}; 
+static long  count_position[3] = {0x0,0x0,0x0};
 
 void setup() {     
 
-  // initialize PORTD as input.
-   //arduino d2 d3 d4 d5 d6 d7 <- d0 - d5
-  DDRD = DDRD | B00000000;
-
-  //arduino d8, d9, d10 d11 d12 <- d6 d7, ->cs1 cs2 cs3
-  DDRB = DDRB | B00011100;
-
+   pinMode (d0, INPUT); 
+   pinMode (d1, INPUT); 
+   pinMode (d2, INPUT); 
+   pinMode (d3, INPUT); 
+   pinMode (d4, INPUT); 
+   pinMode (d5, INPUT); 
+   pinMode (d6, INPUT); 
+   pinMode (d7, INPUT); 
+   pinMode (res, OUTPUT); 
+   pinMode (clk, OUTPUT); 
+   pinMode (oe1, OUTPUT); 
+   
+  
+  digitalWrite(res,LOW);
   digitalWrite(res,HIGH);
 
   /* Setup encoder pins as inputs */
@@ -103,28 +113,29 @@ void setup() {
 
 void readCounters(){
   // enable counter output
-  // digitalWrite(oe1,LOW);       // 4.55 uS
-  PORTB |= 1<<2; // Set bit 2 high
-    // read PORTD and PORTB
-  count[0] = (PORTD & B11111100) | ( PORTB & B00000011);
-  //digitalWrite(oe1,HIGH);      // 3.95 uS
-  PORTB &= ~(1<<2); // Set bit 2 low
+ 
+  
+  PORTB &= ~_BV(2); // Set bit 2 low
+  count[0] = (PIND & 0b11111100) | ( PINC & 0b00000011);
+  PORTB |= _BV(2); // Set bit 2 high
+  PORTB &= ~_BV(0); // reset low
+  PORTB |= _BV(0);  // reset high
   
    // enable counter output
-  //digitalWrite(oe2,LOW);      // 4.55 uS
-  PORTB |= 1<<3; // Set bit 3 high
-    // read PORTD and PORTB
-  count[1] = (PORTD & B11111100) | ( PORTB & B00000011);
-  //digitalWrite(oe2,HIGH);     // 3.95 uS
+ 
   PORTB &= ~(1<<3); // Set bit 3 low
+  count[1] = (PIND & 0b11111100) | ( PINC & 0b00000011);
+  PORTB |= 1<<3; // Set bit 3 high
+  PORTB &= ~_BV(0); // reset low
+  PORTB |= _BV(0);  // reset high
   
    // enable counter output
-  // digitalWrite(oe3,LOW);      // 4.55 uS
-  PORTB |= 1<<4; // Set bit 4 high
-    // read PORTD and PORTB
-  count[2] = (PORTD & B11111100) | ( PORTB & B00000011);
-  //digitalWrite(oe3,HIGH);     // 3.95 uS
+
   PORTB &= ~(1<<4); // Set bit 4 low
+  count[2] = (PIND & 0b11111100) | ( PINC & 0b00000011);
+  PORTB |= 1<<4; // Set bit 4 high
+  PORTB &= ~_BV(0); // reset low
+  PORTB |= _BV(0);  // reset high
 }
 
 // 
@@ -141,14 +152,15 @@ void updatePosition() {
     // else update position
     
     delta = count[i] - count_old[i]; // get the difference since last run
+    //count_old[i] = count[i];
    
-    if ( delta > 127 ){  count[i] = count[i] - 255; } // counter overflow assume one cycle
-   
-    if ( delta < -127){  count[i] = count[i] + 255;  } // counter overflow assume one cycle
-   
-    position[i] = position[i] + delta; 
+   // if ( delta > 127 ){  count[i] = count[i] - 255; } // counter overflow assume one cycle
+   // if ( delta < -127){  count[i] = count[i] + 255;  } // counter overflow assume one cycle
+    // Serial.println(delta, DEC);
+    count_position[i] +=  delta; 
     
   }
+   //Serial.println(count_position[0], DEC);
 }
 
  /* returns change in encoder state (-1,0,1) */
@@ -173,24 +185,40 @@ void updateRotEnc(){
     counter += tmpdata;
   }
 }
+void debug() {
+   //int var = (PORTD & B11111100) | ( PORTC & B00000011);
+   DDRC |= 0x00; 
+  int var =  PINC & 0b00000001;
+ // var = PORTC & _BV(0)
+if (Serial.available() > 0) {
+                // read the incoming byte:
+               // incomingByte = Serial.read();
 
+                // say what you got:
+                Serial.print("in> : ");
+                Serial.println(var, HEX);
+                pinMode (A0, INPUT);
+                Serial.println(digitalRead(A0),HEX);
+        }
+}
 void loop() {
-
+   //  debug();
     readCounters();
     updatePosition();
         
     Serial.print(F("X"));
-    Serial.print((long)position[0]);
-    Serial.print(F(";"));
+    Serial.print((long)count_position[0]);
+    Serial.println(F(";"));
 
-    Serial.print(F("Z"));
-    Serial.print((long)position[1]);
-    Serial.print(F(";"));
+   // Serial.print(F("Z"));
+   // Serial.print((long)position[1]);
+   // Serial.println(F(";"));
 
-    Serial.print(F("T"));
-    Serial.print((unsigned long)position[2]);//tachReadoutMicrosec
-    Serial.print(F("/"));
-    Serial.print((unsigned long)position[2]); // tach position
-
+   // Serial.print(F("T"));
+   // Serial.print((unsigned long)position[2]);//tachReadoutMicrosec
+   // Serial.print(F("/"));
+   // Serial.print((unsigned long)position[2]); // tach position
+   // Serial.println(F(";"));
+ 
   
 }
