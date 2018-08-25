@@ -1,4 +1,3 @@
-
 /*
   Simple Lathe Controller based on Arduino Nano and HCTL2000
   
@@ -6,7 +5,7 @@
   Log:  HdW, Aug 2018 - Draft 1, Tested
   ToDo:   
             
-  Limits calculations:
+   Limits calculations:
    If the HCTL clock input is 14 MHZ, accordning to the datasheet, the maximum input pulse frequency is 14/3 MHZ or 4,67MHZ
    this equates to 214.3 nS per pulse. 
    If the 8 bit mode (SEL High) is used we can count 127 pulses before counter overflow or 127 * 214 nS = 27.2 uS 
@@ -32,8 +31,21 @@
    For a 2000 rpm spindle speed, which is unusualy high for threading, the spindle will rotate 33 times per second, 
    or 838.2mm. Then 838.2/0,005 = 167640 Pulses per second, or 5.9uS per pulse; 
    this is aproximately 30 times slower than the maximum input frequency for the counters.
-  
 
+   Input switches are scanned with oe1-oe3 and swA-swD 
+   swA - SwD are mapped to PORTC and have internal pullups resistors enabled. When the input is read on  port C from 
+   the external counter the switch status is also read and updated.
+   
+   PC2 -[]- oe1 
+
+Updates:
+ First measurements show read pulses of 125ns
+ The read routine is fast enough, but using Arduino Serial.write takes aproximately 650uS per cycle. Will have to convert
+ this to an interup driven routine with circular buffer.
+ If the spindle runs at 3000 RPM or 50HZ, with a 1000CPR Encoder this will be 50KHz , or 50e3 PPS, still well in limits 
+ of 8MHz counter clock.
+ 
+ 
 For reference, and code snips, ideas, credits are due:
 
  http://skpang.co.uk/blog/archives/323
@@ -57,6 +69,11 @@ For reference, and code snips, ideas, credits are due:
 #define d0 14 // PC0 1
 #define d1 15 // PC1 15
 
+#define swA 16 // PC2
+#define swB 17 // PC3
+#define swC 18 // PC4 
+#define swD 19 // PC5
+
 #define res 8 //PB0 5
 #define clk 9 // PB1 2
 
@@ -71,6 +88,7 @@ For reference, and code snips, ideas, credits are due:
 
 static int8_t count[3] = {0x0,0x0,0x0}; 
 static int8_t count_old[3] = {0x0,0x0,0x0}; 
+static uint8_t buttons[3] = {0x0,0x0,0x0}; 
 static long  count_position[3] = {0x0,0x0,0x0};
 
 void setup() {     
@@ -86,7 +104,8 @@ void setup() {
    pinMode (res, OUTPUT); 
    pinMode (clk, OUTPUT); 
    pinMode (oe1, OUTPUT); 
-   
+
+   PORTC =  0b00111100; // pullups for button inputs
   
   digitalWrite(res,LOW);
   digitalWrite(res,HIGH);
@@ -113,21 +132,23 @@ void setup() {
 
 void readCounters(){
   // enable counter output
- 
-  
+   
   PORTB &= ~_BV(2); // Set bit 2 low
-  count[0] = (PIND & 0b11111100) | ( PINC & 0b00000011);
+//  count[0] = (PIND & 0b11111100) | ( PINC & 0b00000011);
+  count[0] = PIND & 0b11111100 
+  count[0] |= PINC & 0b00000011;
+  buttons[0] = PINC & 0b00111100;
   PORTB |= _BV(2); // Set bit 2 high
-  PORTB &= ~_BV(0); // reset low
-  PORTB |= _BV(0);  // reset high
+  //PORTB &= ~_BV(0); // reset low
+  //PORTB |= _BV(0);  // reset high
   
    // enable counter output
  
   PORTB &= ~(1<<3); // Set bit 3 low
   count[1] = (PIND & 0b11111100) | ( PINC & 0b00000011);
   PORTB |= 1<<3; // Set bit 3 high
-  PORTB &= ~_BV(0); // reset low
-  PORTB |= _BV(0);  // reset high
+  //PORTB &= ~_BV(0); // reset low
+  //PORTB |= _BV(0);  // reset high
   
    // enable counter output
 
