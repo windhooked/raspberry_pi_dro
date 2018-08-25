@@ -5,7 +5,7 @@
   Log: HdW, Aug 2018 - Draft 1, not tested
   
   Limits calculations:
-   If the HCTL clock input is 14 MHZ, the maximum allowed input pulse frequency is 14/3 MHZ or 4,67MHZ
+   If the HCTL clock input is 14 MHZ, accordning to the datasheet, the maximum input pulse frequency is 14/3 MHZ or 4,67MHZ
    this equates to 214.3 nS per pulse. 
    If the 8 bit mode (SEL High) is used we can count 127 pulses before counter overflow or 127 * 214 nS = 27.2 uS 
    
@@ -37,12 +37,14 @@ For reference, and code snips, ideas, credits are due:
  http://skpang.co.uk/blog/archives/323
  https://efundies.com/avr-bitwise-operations-in-c/
  https://inst.eecs.berkeley.edu/~ee128/fa04/labs/hctl2016.pdf
+ http://www.farnell.com/datasheets/312480.pdf
  https://www.torretje.nl/files/p8255optim.ino
+ https://arduino.stackexchange.com/questions/16698/arduino-constant-clock-output
  https://www.circuitsathome.com/mcu/reading-rotary-encoder-on-arduino/
 */
  
-#define ENC_A 14
-#define ENC_B 15
+#define ENC_A 16
+#define ENC_B 17
 #define ENC_PORT PINC
 
 #define d2 2 // PD2
@@ -52,13 +54,16 @@ For reference, and code snips, ideas, credits are due:
 #define d6 6 // PD6
 #define d7 7 // PD7
 
-#define d0 8 // PB0
-#define d1 9 // PB1
+#define d0 14 // PC0
+#define d1 15 // PC1
+
+#define res 10 //PB0
+#define clk 9 // PB1
 
 #define oe1 10 //PB2
 #define oe2 11 //PB3
 #define oe3 12 //PB4
-#define res 13 //PB5
+#define open 13 //PB5
 
 
 static uint8_t count[3] = {0x0,0x0,0x0}; 
@@ -81,7 +86,14 @@ void setup() {
   digitalWrite(ENC_A, HIGH);
   pinMode(ENC_B, INPUT);
   digitalWrite(ENC_B, HIGH);
-
+  
+  // set up 8 MHz timer on CLOCKOUT (OC1A)
+  pinMode (clk, OUTPUT); 
+  // set up Timer 1
+  TCCR1A = bit (COM1A0);  // toggle OC1A on Compare Match
+  TCCR1B = bit (WGM12) | bit (CS10);   // CTC, no prescaling
+  OCR1A =  0;       // output every cycle
+  
   // 
   Serial.begin (115200);
   Serial.println("Start");
