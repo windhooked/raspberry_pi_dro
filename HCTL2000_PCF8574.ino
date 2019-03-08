@@ -55,24 +55,34 @@ int readHCTL() {
 
   unsigned char _l = 0;
   unsigned char _h = 0;
-  int _date = 0;
+  int _data = 0;
   
   SEL = 1;
   
   Wire.requestFr(0x00, 2);
   if(Wire.available()) {
     _l = Wire.receive();
+    _data = _l;
   }
   SEL = 0;
   if(Wire.available()) {
     _h = Wire.receive();
+    _data |= ( _h << 8 )
+  }
+   // https://www.avrfreaks.net/forum/any-neat-sign-extension-tricks-10-bit-16-bit
+   //struct {signed int _data:12;} x;
+   //_data = x._data = _data;
+   _data = ( _data ^ 0x800 ) - 0x800;
+   
+  //     _data = ( x>> 11) == 0 ? _data : -1 ^ 0xFFF | _data;
+   // _data = ( _data & 0x800 ? _data | 0xf000 : _data );
     
-    if  ( _h & (1<<4) ) { // test for sign, negative?
-     _data = 0xf000; // add sign to 16 bit int
-     clearbit(_h,4);  // clear sign on 12 bit sample
-     _data | = _h<<8; // load high byte to 16bit int
-    } 
-    _data |= _l; // load low by to 16 bit
+    //if  ( _h & (1<<4) ) { // test for sign, negative?
+    // _data = 0xf000; // add sign to 16 bit int
+    // clearbit(_h,4);  // clear sign on 12 bit sample
+    // _data | = _h<<8; // load high byte to 16bit int
+    //} 
+   
   }
   return _data;
 }
