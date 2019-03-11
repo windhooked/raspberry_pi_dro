@@ -22,6 +22,14 @@ void setup()
 { 
   Serial.begin(115200);
   
+  // CLK signal for HCTL2000 
+  // set up 8 MHz timer on CLOCKOUT (OC1A)
+  pinMode (clk, OUTPUT); 
+  // set up Timer 1
+  TCCR1A = bit (COM1A0);  // toggle OC1A on Compare Match
+  TCCR1B = bit (WGM12) | bit (CS10);   // CTC, no prescaling
+  OCR1A = 0; // output every cycle
+  
   // Timer0 is already used for millis() - we'll just interrupt somewhere
   // in the middle and call the "Compare A" function below
   OCR0A = 0xAF;
