@@ -1,0 +1,191 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="utf-8">
+<title>DRO</title>
+<link type="text/css" rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="jquery-ui.css">
+<script src="jquery-1.12.4.js"></script>
+<script src="jquery-ui.js"></script>
+
+<style>
+.body { margin:0; padding:0; }
+
+.wrap {
+    width:100%;
+    margin:0 auto;
+}
+.header {
+    height:10%;
+    margin-bottom:2px;
+    padding: 8px;
+    background-color:#555555;;
+}
+.content {
+    width:100%;
+    height:80%;
+    background-color:#555555;;
+    float:right;
+}
+.sidebar {
+    width:0%;
+    height:80%;
+    background-color:#555555;
+    float:left;
+
+}
+.footer {
+    height:10%;
+    margin-top:2px;
+    background-color:#555555;
+    padding: 8px;
+}
+.clear {
+    clear:both;
+}
+.soft-button
+{
+      background-color: #777777;
+      color: black;
+      padding: 10px 15px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      cursor: pointer;
+      border-radius: 5px;
+}
+.disp {
+  font-family: Impact, Charcoal, sans-serif;
+  border: 1px solid black;
+  width: 100%;
+  height: 10%;
+  background: #999;
+  background-color: white;
+  line-height: 100%;
+  border-radius: 5px;
+}
+.digits
+{
+  font-family: Impact, Charcoal, sans-serif;
+  font-size: 300%;
+  text-align: center;
+  float: right;
+}
+.digits-right
+{
+  text-align: center;
+  float: right;
+}
+.axis-button {
+  background-color: #ff9900;
+  font-size: 100%;
+  border: none;
+  color: black;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  cursor: pointer;
+  border-radius: 5px;
+}
+</style>
+</head>
+<body onload="updateDisp()">
+<script>
+
+  function showOption() {
+    var x = document.getElementById("help_screen");
+    if (x.style.display === "none") {
+      x.style.display = "block";
+      x.width="80%";
+    } else {
+      x.style.display = "none";
+    }
+  }
+  function updateDisp() {
+
+    $.ajax({
+        url: 'http://example.com/',
+        type: 'PUT',
+        data: 'ID=1&Name=John&Age=10', // or $('#myform').serializeArray()
+        success: function() { alert('PUT completed'); }
+    });
+
+    document.onload = document.getElementById("d0").innerHTML = "10.001";
+    document.onload = document.getElementById("d1").innerHTML = "110.001";
+    document.onload = document.getElementById("d2").innerHTML = "2700";
+
+ }
+  function update(i, j, k) {
+    var bar1 = (k * 50) + 50;
+    var bar2 = bar1 + 1;
+    var bar3 = bar2 + 2;
+    var magic = "linear-gradient(to right, #FFFFFF " + bar1 + "% ,green " + bar2 + "% , #FFFFFF " + bar3 + "%)";
+    document.getElementById("dtg-0").style.background = magic;
+  //  document.getElementById("disp0").innerHTML = "000.0";
+};
+</script>
+
+
+
+<div class="wrap">
+
+	<div class="header">
+    <button class="soft-button" onclick=showOption() >HELP</button> &nbsp;
+    <button class="soft-button">SETUP</button> &nbsp;
+    <button class="soft-button">MM/INCH</button> &nbsp;
+    <button class="soft-button">CALC</button> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <span id=date> 2019/02/28 11:38 <span>
+  	</div><!-- .header -->
+
+	<div class="content">
+    <div class="disp">
+      <table>
+        <tr>
+          <td style="width: 90%;"> <div class="digits"> <font id="d0" > 000.001 </font></div> </td>
+          <td><span>REF</span> &nbsp;</td>
+          <td> <button class="axis-button">X</button> </td>
+       </tr>
+       <tr></tr>
+       <tr>
+         <td style="width: 737.283px;"> <div class="digits"> <font id="d1" > 000.001 </font> </div> </td>
+         <td><span>REF</span> &nbsp;</td>
+         <td> <button class="axis-button">Z</button> </td>
+      </tr>
+      <tr></tr>
+      <tr>
+        <td style="width: 737.283px;"> <div class="digits"> 2800.00 </div> </td>
+        <td><span>REF</span> &nbsp;</td>
+        <td> <button class="axis-button">S</button> </td>
+     </tr>
+     <tr></tr>
+     </table>
+  </div>
+	</div><!-- .content -->
+
+    <div class="sidebar" id=help_screen style="display: none;">
+      <h3> Menu<br>
+        <small><span class="glyphicon glyphicon-info-sign"></span> Press <kbd>ESC</kbd>
+          to close</small> </h3>
+      <a href="#include">How to include</a> <a href="#use">How to use</a> <a href="#method">Methods</a>
+      <a href="#option">Options</a>
+    </div><!-- .sidebar -->
+
+
+    <div class="clear"></div>
+
+	<div class="footer">
+
+    <button class="soft-button">TOOL A01 </button> &nbsp;
+    <button class="soft-button">ABS/DTG</button> &nbsp;
+
+
+    <button class="soft-button">SET/ZERO</button> &nbsp;
+    <button class="soft-button"><></button> &nbsp;
+
+	</div><!-- .footer -->
+
+</div><!-- .wrap -->
+
+</body>
+</html>
