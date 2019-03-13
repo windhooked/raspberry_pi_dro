@@ -1,4 +1,5 @@
-
+https://hobbybotics.com/projects/hobbybotics-pcf8574a-i2c-io-expander/
+http://dangerousprototypes.com/docs/HD44780_character_LCD_adapter
 //                      Access bits like variables:
 struct bits {
   uint8_t b0:1, b1:1, b2:1, b3:1, b4:1, b5:1, b6:1, b7:1;
