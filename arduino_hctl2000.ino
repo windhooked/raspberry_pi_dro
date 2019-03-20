@@ -55,6 +55,7 @@ For reference, and code snips, ideas, credits are due:
  https://www.torretje.nl/files/p8255optim.ino
  https://arduino.stackexchange.com/questions/16698/arduino-constant-clock-output
  https://www.circuitsathome.com/mcu/reading-rotary-encoder-on-arduino/
+ https://forum.arduino.cc/index.php?topic=117964.0
 */
  
 
